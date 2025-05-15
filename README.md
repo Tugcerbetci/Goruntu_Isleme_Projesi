@@ -28,7 +28,7 @@ Logging	Uygulama günlüğü ve hata takibi
 - ![monet](https://github.com/user-attachments/assets/7297cecd-50d6-4432-ba79-af8263f9508d)
 - ### Van Gogh Tarzı
  - ![picasso](https://github.com/user-attachments/assets/493d4627-33b7-46b9-bc9a-09bd0de5115a)
-- ### Picasso Tarzı Van Gogh
+- ### Picasso Tarzı 
  ![van gogh](https://github.com/user-attachments/assets/620362b3-bf28-4fe1-ab37-c3b028b3642a)
 
 
