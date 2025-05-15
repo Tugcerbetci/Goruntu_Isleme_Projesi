@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌼 Çiçekten Sanat 🎨</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f6f1e5;
+        }
+        h1 {
+            color: #508271;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .styles-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .style-option {
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .style-option.selected {
+            border-color: #629d89;
+        }
+        .style-option img {
+            width: 200px;
+            height: 150px;
+            object-fit: cover;
+        }
+        .upload-container {
+            background-color: rgb(251, 245, 222);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(1, 42, 20, 0.1);
+        }
+        .results-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .image-container {
+            flex: 1;
+            text-align: center;
+            background-color: rgba(215, 211, 195, 0.792);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .image-container img {
+            max-width: 100%;
+            max-height: 400px;
+        }
+        .btn {
+            background-color: #4b8e77;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #508271;
+        }
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .loading {
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌼 Çiçekten Sanat 🎨</h1>
+    
+    <div class="container">
+        <div class="upload-container">
+            <h2>Resim Seçin </h2>
+            
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div>
+                    <label for="imageUpload">Resim seçin:</label>
+                    <input type="file" id="imageUpload" name="file" accept=".jpg,.jpeg,.png">
+                </div>
+                
+                <h2>Stil seçin </h2>
+                <div class="styles-container">
+                    {% for style in styles %}
+                    <div class="style-option" data-style="{{ style.filename.split('.')[0] }}">
+                        <img src="/static/styles/{{ style.filename }}" alt="{{ style.name }}" onerror="this.src='/static/styles/placeholder.jpg'">
+                        <p>{{ style.name }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div style="text-align: center;">
+              <button type="submit" class="btn">Uygula</button>
+               </div>
+
+            </form>
+            
+            <div id="errorMessage" class="error"></div>
+            <div id="loadingMessage" class="loading"></div>
+        </div>
+        
+        <div class="results-container" id="resultsContainer" style="display: none;">
+            <div class="image-container">
+                <h3>Orijinal Resim</h3>
+                <img id="originalImage" src="" alt="Orijinal Resim">
+            </div>
+            
+            <div class="image-container">
+                <h3>Stil Uygulanmış Resim</h3>
+                <img id="stylizedImage" src="" alt="Stil Uygulanmış Resim">
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Style selection
+        const styleOptions = document.querySelectorAll('.style-option');
+        let selectedStyle = 'vangogh'; // Default style
+        
+        styleOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                // Remove selected class from all options
+                styleOptions.forEach(opt => opt.classList.remove('selected'));
+                
+                // Add selected class to clicked option
+                option.classList.add('selected');
+                
+                // Update selected style
+                selectedStyle = option.dataset.style;
+            });
+        });
+        
+        // Select default style
+        document.querySelector('[data-style="vangogh"]').classList.add('selected');
+        
+        // Form submission
+        const uploadForm = document.getElementById('uploadForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const originalImage = document.getElementById('originalImage');
+        const stylizedImage = document.getElementById('stylizedImage');
+        
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('imageUpload');
+            if (!fileInput.files.length) {
+                errorMessage.textContent = 'Lütfen bir resim seçin';
+                return;
+            }
+            
+            // Create FormData
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('style', selectedStyle);
+            
+            // Show loading message
+            errorMessage.textContent = '';
+            loadingMessage.textContent = 'İşlem yapılıyor, lütfen bekleyin...';
+            
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    errorMessage.textContent = `Hata: ${data.error}`;
+                    loadingMessage.textContent = '';
+                } else {
+                    // Show results
+                    loadingMessage.textContent = '';
+                    resultsContainer.style.display = 'flex';
+                    
+                    // Display original image
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        originalImage.src = e.target.result;
+                    };
+                    reader.readAsDataURL(fileInput.files[0]);
+                    
+                    // Display stylized image
+                    stylizedImage.src = data.result_url + '?t=' + new Date().getTime(); // Add timestamp to prevent caching
+                }
+            } catch (error) {
+                errorMessage.textContent = `Bir hata oluştu: ${error.message}`;
+                loadingMessage.textContent = '';
+            }
+        });
+    </script>
+</body>
+</html>
