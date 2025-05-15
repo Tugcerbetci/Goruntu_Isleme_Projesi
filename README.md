@@ -8,12 +8,11 @@
 
 - 🤖 TensorFlow Hub üzerinde eğitilmiş arbitrary image stylization modeli kullanılır.
 
-💾-  Otomatik stil görseli indirme ve hata durumunda yedek placeholder oluşturma.
+ - 💾 Otomatik stil görseli indirme ve hata durumunda yedek placeholder oluşturma.
 
 - 🔍 Gelişmiş hata yönetimi ve logging desteği.
 
 ## 🛠️ Kullanılan Teknolojiler
-Teknoloji	Açıklama
 Flask	Python tabanlı web framework
 TensorFlow & TensorFlow Hub	Derin öğrenme modeli kullanımı
 Pillow (PIL)	Görsel işleme
